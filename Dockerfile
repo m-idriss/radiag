@@ -1,5 +1,6 @@
-# Stage 1: Build the application
-FROM quay.io/quarkus/ubi-quarkus-native-image:22.3.0-java17 AS build
+# Stage 1: Build the application using a Maven base image
+FROM maven:3.8.6-openjdk-17-slim AS build
+
 WORKDIR /work
 COPY . .
 RUN mvn clean package -Pnative -Dquarkus.native.container-build=true
