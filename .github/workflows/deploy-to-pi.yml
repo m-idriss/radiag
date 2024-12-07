@@ -1,0 +1,43 @@
+name: Build, Push, and Deploy to Raspberry Pi
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to GitHub Container Registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Build Docker Image
+      run: |
+        docker build -t ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }} .
+
+    - name: Push Docker Image
+      run: |
+        docker push ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}
+
+    - name: Deploy to Raspberry Pi
+      uses: appleboy/ssh-action@v0.1.12
+      with:
+        host: "<raspberry-pi-ip>"
+        username: "pi"
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          echo "Pulling latest image..."
+          podman pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}
+          
+          echo "Stopping and removing the old container..."
+          podman stop myapp || true
+          podman rm myapp || true
+          
+          echo "Starting the new container..."
+          podman run -d --name myapp -p 8080:8080 ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}
