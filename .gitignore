@@ -36,10 +36,15 @@ nb-configuration.xml
 *.orig
 *.rej
 
-# Local environment
-.env
-
 # Plugin directory
 /.quarkus/cli/plugins/
-# TLS Certificates
-.certs/
+
+### ENV ###
+
+/logs
+/src/main/resources/application-test.yml
+/src/main/resources/application-dev.yml
+/src/main/resources/application-prod.yml
+/src/main/resources/keystore/
+.env.prod
+.env
