@@ -6,8 +6,11 @@ on:
       - 'v*'
 
 jobs:
-  build_and_deploy:
+  build-and-test:
     runs-on: ubuntu-latest
+    environment: staging
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
     - name: Checkout code
@@ -23,7 +26,14 @@ jobs:
     - name: Push Docker Image
       run: |
         docker push ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}
-
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+    - name: Debug Environment Variables
+      run: |
+        echo "PUBLIC_IP: ${{ secrets.PUBLIC_IP }}"
+        echo "PI_USERNAME: ${{ secrets.PI_USERNAME }}"
     - name: Deploy to Raspberry Pi
       uses: appleboy/ssh-action@master
       with:
