@@ -1,8 +1,9 @@
-# Stage 1: Build the application using a Maven base image
+### STAGE 1: Build ###
 FROM maven:3.9.9-eclipse-temurin-17-alpine AS build
-
-WORKDIR /work
-COPY . .
+WORKDIR /opt/apt
+COPY src ./src
+COPY pom.xml .
+# Build app
 RUN mvn clean package -Pnative -Dquarkus.native.container-build=true
 
 # Stage 2: Create the final image
